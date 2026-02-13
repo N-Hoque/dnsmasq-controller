@@ -3,9 +3,8 @@ package util
 import (
 	"bytes"
 	"crypto/md5"
-	"fmt"
+	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -34,7 +33,7 @@ func WriteConfig(orig, dest string, data []byte) (bool, error) {
 		f.Close()
 	}
 
-	err := ioutil.WriteFile(dest, data, 0644)
+	err := os.WriteFile(dest, data, 0644)
 	if err != nil {
 		return false, err
 	}
@@ -54,7 +53,7 @@ func TestConfig(f string) error {
 	}
 	err = cmd.Run()
 	if err != nil {
-		err = fmt.Errorf(string(stderr.Bytes()))
+		err = errors.New(stderr.String())
 	}
 	return err
 }

@@ -26,7 +26,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	logrzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	dnsmasqv1beta1 "github.com/kvaps/dnsmasq-controller/api/v1beta1"
 	"github.com/kvaps/dnsmasq-controller/controllers"
@@ -97,11 +100,30 @@ func main() {
 
 	server.Start()
 
+	var cacheDefaultNamespaces map[string]cache.Config
+	if config.WatchNamespace != "" {
+		cacheDefaultNamespaces = map[string]cache.Config{
+			config.WatchNamespace: {},
+		}
+	}
+
+	cacheOptions := cache.Options{
+		DefaultNamespaces: cacheDefaultNamespaces,
+	}
+
+	metricsOptions := metricsserver.Options{
+		BindAddress: config.MetricsAddr,
+	}
+
+	webhookOptions := webhook.Options{
+		Port: 9443,
+	}
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                  scheme,
-		Namespace:               config.WatchNamespace,
-		MetricsBindAddress:      config.MetricsAddr,
-		Port:                    9443,
+		Cache:                   cacheOptions,
+		Metrics:                 metricsOptions,
+		WebhookServer:           webhook.NewServer(webhookOptions),
 		LeaderElection:          config.EnableLeaderElection,
 		LeaderElectionID:        config.LeaderElectionID,
 		LeaderElectionNamespace: config.MyNamespace,

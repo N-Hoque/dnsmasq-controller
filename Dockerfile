@@ -1,5 +1,5 @@
 # Build the dnsmasq-controller binary
-FROM golang:1.22.7 AS builder
+FROM golang:1.24.13 AS builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -21,7 +21,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o dnsmasq-
 # Load distroless base to get initial passwd/group files
 FROM gcr.io/distroless/static-debian12:latest AS app
 
-# Install dnsmasq 
+# Install dnsmasq
 FROM alpine:3.19.1 AS dnsmasq
 # Use distroless passwd/group
 COPY --from=app /etc/passwd /etc/passwd
