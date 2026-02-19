@@ -52,8 +52,8 @@ func TestConfig(f string) error {
 		Stderr: &stderr,
 	}
 	err = cmd.Run()
-	if err != nil {
-		err = errors.New(stderr.String())
+	if err != nil && stderr.Len() > 0 {
+		err = errors.Join(err, errors.New(stderr.String()))
 	}
 	return err
 }

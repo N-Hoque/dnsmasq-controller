@@ -2,6 +2,7 @@ package server
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"os/exec"
 	"path"
@@ -111,6 +112,9 @@ func serverStop(cmd *exec.Cmd) {
 
 func setupDir(p string, cleanup bool) error {
 	dir, err := os.ReadDir(p)
+	if err != nil && errors.Is(err, os.ErrNotExist) {
+		return err
+	}
 	if cleanup {
 		for _, d := range dir {
 			err = os.RemoveAll(path.Join([]string{p, d.Name()}...))

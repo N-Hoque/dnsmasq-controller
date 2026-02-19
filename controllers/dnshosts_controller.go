@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	dnsmasqv1beta1 "github.com/kvaps/dnsmasq-controller/api/v1beta1"
 	"github.com/kvaps/dnsmasq-controller/pkg/conf"
@@ -41,7 +42,7 @@ type DnsHostsReconciler struct {
 // +kubebuilder:rbac:groups=dnsmasq.kvaps.cf,resources=dnshosts,verbs=get;list;watch
 
 func (r *DnsHostsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("dnshost", req.NamespacedName)
+	logger := log.FromContext(ctx).WithValues("dnshost", req.NamespacedName)
 	config := conf.GetConfig()
 
 	configFile := config.DnsmasqConfDir + "/hosts/" + req.Namespace + "-" + req.Name
@@ -53,7 +54,7 @@ func (r *DnsHostsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			// Request object not found
 			if _, err := os.Stat(configFile); !os.IsNotExist(err) {
 				os.Remove(configFile)
-				r.Log.Info("Removed " + configFile)
+				logger.Info("Removed " + configFile)
 				config.Generation++
 			}
 			return ctrl.Result{}, nil
@@ -66,7 +67,7 @@ func (r *DnsHostsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		if _, err := os.Stat(configFile); !os.IsNotExist(err) {
 			// Controller name has been changed
 			os.Remove(configFile)
-			r.Log.Info("Removed " + configFile)
+			logger.Info("Removed " + configFile)
 			config.Generation++
 		}
 		return ctrl.Result{}, nil
@@ -85,12 +86,12 @@ func (r *DnsHostsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	configWritten, err := util.WriteConfig(configFile, configFile, configBytes)
 	if err != nil {
-		r.Log.Error(err, "Failed to update "+configFile)
+		logger.Error(err, "Failed to update "+configFile)
 		return ctrl.Result{}, nil
 	}
 
 	if configWritten {
-		r.Log.Info("Written " + configFile)
+		logger.Info("Written " + configFile)
 		config.Generation++
 	}
 

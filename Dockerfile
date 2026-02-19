@@ -22,7 +22,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o dnsmasq-
 FROM gcr.io/distroless/static-debian12:latest AS app
 
 # Install dnsmasq
-FROM alpine:3.19.1 AS dnsmasq
+FROM alpine:3.23.3 AS dnsmasq
 # Use distroless passwd/group
 COPY --from=app /etc/passwd /etc/passwd
 COPY --from=app /etc/group /etc/group
