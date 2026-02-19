@@ -2,10 +2,9 @@ package server
 
 import (
 	"bufio"
-	"errors"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -111,26 +110,16 @@ func serverStop(cmd *exec.Cmd) {
 }
 
 func setupDir(p string, cleanup bool) error {
-	dir, err := os.ReadDir(p)
-	if err != nil && errors.Is(err, os.ErrNotExist) {
-		return err
-	}
 	if cleanup {
-		for _, d := range dir {
-			err = os.RemoveAll(path.Join([]string{p, d.Name()}...))
-			if err != nil {
-				return err
-			}
+		if err := os.RemoveAll(p); err != nil {
+			return err
 		}
 	}
 
 	dirs := []string{"/", "/hosts", "/dhcp-hosts", "/dhcp-opts"}
 	for _, dir := range dirs {
-		if _, err := os.Stat(p + dir); os.IsNotExist(err) {
-			err := os.MkdirAll(p+dir, os.ModePerm)
-			if err != nil {
-				return err
-			}
+		if err := os.MkdirAll(filepath.Join(p, dir), os.ModePerm); err != nil {
+			return err
 		}
 	}
 	return nil
