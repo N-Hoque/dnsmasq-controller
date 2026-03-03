@@ -20,7 +20,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -35,7 +34,6 @@ import (
 // DnsHostsReconciler reconciles a DnsHosts object
 type DnsHostsReconciler struct {
 	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -87,7 +85,7 @@ func (r *DnsHostsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	configWritten, err := util.WriteConfig(configFile, configFile, configBytes)
 	if err != nil {
 		logger.Error(err, "Failed to update "+configFile)
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	if configWritten {

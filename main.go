@@ -135,7 +135,6 @@ func main() {
 
 	if err = (&controllers.DnsmasqOptionsReconciler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("DnsmasqOptions"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DnsmasqOptions")
@@ -144,7 +143,6 @@ func main() {
 	if config.EnableDNS {
 		if err = (&controllers.DnsHostsReconciler{
 			Client: mgr.GetClient(),
-			Log:    ctrl.Log.WithName("controllers").WithName("DnsHosts"),
 			Scheme: mgr.GetScheme(),
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "DnsHosts")
@@ -154,7 +152,6 @@ func main() {
 	if config.EnableDHCP {
 		if err = (&controllers.DhcpHostsReconciler{
 			Client: mgr.GetClient(),
-			Log:    ctrl.Log.WithName("controllers").WithName("DhcpHosts"),
 			Scheme: mgr.GetScheme(),
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "DhcpHosts")
@@ -162,7 +159,6 @@ func main() {
 		}
 		if err = (&controllers.DhcpOptionsReconciler{
 			Client: mgr.GetClient(),
-			Log:    ctrl.Log.WithName("controllers").WithName("DhcpOptions"),
 			Scheme: mgr.GetScheme(),
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "DhcpOptions")

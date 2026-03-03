@@ -20,7 +20,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -35,7 +34,6 @@ import (
 // DnsmasqOptionsReconciler reconciles a DnsmasqOptions object
 type DnsmasqOptionsReconciler struct {
 	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -93,20 +91,20 @@ func (r *DnsmasqOptionsReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	configWritten, err := util.WriteConfig(configFile, tmpConfigFile, configBytes)
 	if err != nil {
 		logger.Error(err, "Failed to update "+configFile)
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	if configWritten {
 		if err = util.TestConfig(tmpConfigFile); err != nil {
 			//os.Remove(tmpConfigFile)
 			logger.Error(err, "Config "+tmpConfigFile+" is invalid!")
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, err
 		}
 
 		if err = os.Rename(tmpConfigFile, configFile); err != nil {
 			os.Remove(tmpConfigFile)
 			logger.Error(err, "Failed to move "+tmpConfigFile+" to "+configFile)
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, err
 		}
 		logger.Info("Written " + configFile)
 		config.Generation++
